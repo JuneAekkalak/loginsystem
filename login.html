@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="loginForm" action="#" method="POST" onsubmit="return validateForm()">
+            <div class="input-group">
+                <label for="email">Username:</label>
+                <input type="email" id="username" name="username" required>
+                <span id="emailError" class="error-message"></span>
+            </div>
+            <div class="input-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password"  required>
+                <span id="passwordError" class="error-message"></span>
+            </div>
+            <button class="btn" type="submit">Login</button>
+        </form>
+    </div>
+
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h4 class="warning">warning</h4>
+            <p id="errorMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        function validateForm() {
+            var emailInput = document.getElementById('username').value;
+            var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            var emailError = document.getElementById('emailError');
+
+            if (!emailPattern.test(emailInput)) {
+                emailError.textContent = "กรุณากรอกอีเมลให้ถูกต้อง";
+                return false;
+            } else {
+                emailError.textContent = "";
+            }
+
+            return true;
+        }
+
+        document.getElementById("loginForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            if (!validateForm()) {
+                return;
+            }
+
+            var formData = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+
+            fetch('http://localhost:8000/login/userlogin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => {
+                    console.log(response)
+                    if (!response.ok) {
+                        response.json().then(data => {
+                            displayErrorModal(data.message);
+                        });
+                    } else {
+                        window.location.href = "./success.html";
+                    }
+
+                })
+
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                    displayErrorModal(error.message);
+                });
+        });
+
+        function displayErrorModal(errorMessage) {
+            var modal = document.getElementById("errorModal");
+            var modalContent = document.getElementById("errorMessage");
+            var closeButton = document.getElementsByClassName("close")[0];
+
+            modal.style.display = "block";
+            modalContent.textContent = errorMessage;
+
+            closeButton.onclick = function () {
+                modal.style.display = "none";
+            }
+
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
